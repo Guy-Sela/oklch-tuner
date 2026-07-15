@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OKLCH Tuner | xFeinschmecker</title>
+
+  <style>
+    /* ==========================================================================
+       THEME VARIABLES
+       ========================================================================== */
+    :root, html[data-theme="light"] {
+      --bg-main: oklch(98% 0.01 250 / 1);
+      --surface: oklch(100% 0.00 0 / 1);
+      --border: oklch(90% 0.02 250 / 1);
+      --text-main: oklch(25% 0.04 250 / 1);
+      --text-muted: oklch(55% 0.02 250 / 1);
+      --accent: oklch(55% 0.15 250 / 1);
+      --accent-hover: oklch(45% 0.15 250 / 1);
+      --accent-text: oklch(100% 0.00 0 / 1);
+    }
+
+    html[data-theme="dark"] {
+      --bg-main: oklch(16% 0.01 250 / 1);
+      --surface: oklch(20% 0.02 250 / 1);
+      --border: oklch(28% 0.03 250 / 1);
+      --text-main: oklch(95% 0.01 250 / 1);
+      --text-muted: oklch(70% 0.02 250 / 1);
+      --accent: oklch(75% 0.15 250 / 1);
+      --accent-hover: oklch(85% 0.15 250 / 1);
+      --accent-text: oklch(16% 0.01 250 / 1);
+    }
+
+    /* ==========================================================================
+       REALISTIC UI STYLES
+       ========================================================================== */
+    body {
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      font-family: system-ui, -apple-system, sans-serif;
+      margin: 0; padding: 0;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    /* Navigation */
+    nav {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 20px 5%;
+      background-color: var(--surface);
+      border-bottom: 1px solid var(--border);
+      transition: all 0.3s;
+    }
+    nav .logo { font-weight: 800; font-size: 1.2rem; letter-spacing: -0.5px; }
+
+    .nav-actions { display: flex; gap: 16px; align-items: center; }
+
+    .theme-toggle {
+      background: transparent; color: var(--text-muted);
+      border: none; padding: 8px 12px;
+      border-radius: 6px; cursor: pointer; font-size: 0.9rem; font-weight: 500;
+      transition: all 0.2s;
+    }
+    .theme-toggle:hover { color: var(--text-main); background-color: var(--bg-main); }
+
+    /* Buttons */
+    .btn {
+      background-color: var(--accent); color: var(--accent-text);
+      border: 1px solid var(--accent); padding: 12px 24px; border-radius: 8px;
+      font-size: 1rem; font-weight: 600; cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn:hover { background-color: var(--accent-hover); border-color: var(--accent-hover); }
+    .btn:active { transform: scale(0.98); }
+
+    .btn-outline {
+      background-color: transparent; color: var(--text-main);
+      border: 1px solid var(--border);
+    }
+    .btn-outline:hover {
+      border-color: var(--accent); color: var(--accent);
+      background-color: transparent;
+    }
+
+    /* Hero Section */
+    .hero {
+      display: flex; align-items: center; justify-content: space-between; gap: 40px;
+      padding: 80px 5%; max-width: 1200px; margin: 0 auto;
+    }
+    .hero-content { flex: 1; }
+    .hero h1 { font-size: 3.5rem; margin: 0 0 20px 0; line-height: 1.1; letter-spacing: -0.03em; }
+    .hero p { color: var(--text-muted); font-size: 1.25rem; line-height: 1.6; margin-bottom: 32px; max-width: 500px; }
+
+    .hero-image {
+      flex: 1; height: 400px; border-radius: 20px;
+      background-image: url('https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&w=1200&q=80');
+      background-size: cover; background-position: center;
+      border: 1px solid var(--border);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    }
+
+    /* Feature Grid with Interactive Hover States */
+    .features {
+      padding: 60px 5%; max-width: 1200px; margin: 0 auto 80px;
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px;
+    }
+    .card {
+      background-color: var(--surface); border: 1px solid var(--border);
+      border-radius: 16px; padding: 32px; cursor: default;
+      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), border-color 0.3s, box-shadow 0.3s;
+    }
+    .card h3 { margin-top: 0; font-size: 1.25rem; transition: color 0.3s; }
+    .card p { color: var(--text-muted); line-height: 1.5; margin-bottom: 0; }
+
+    .card:hover {
+      transform: translateY(-6px);
+      border-color: var(--accent);
+      box-shadow: 0 12px 24px rgba(0,0,0,0.08);
+    }
+    .card:hover h3 { color: var(--accent); }
+
+    /* Footer */
+    footer {
+      text-align: center; padding: 40px 20px;
+      font-size: 0.9rem; color: var(--text-muted);
+      border-top: 1px solid var(--border); background-color: var(--surface);
+    }
+    footer a { color: var(--text-main); text-decoration: none; font-weight: 600; transition: color 0.2s; }
+    footer a:hover { color: var(--accent); }
+
+    /* Dark mode shadow adjustment */
+    html[data-theme="dark"] .card:hover {
+      box-shadow: 0 12px 24px rgba(0,0,0,0.4);
+    }
+    html[data-theme="dark"] .hero-image {
+      box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+    }
+
+    @media (max-width: 768px) {
+      .hero { flex-direction: column; text-align: center; padding: 40px 5%; }
+      .hero p { margin: 0 auto 32px; }
+      .hero-image { width: 100%; height: 300px; }
+      .nav-actions .btn-outline { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+    <nav>
+      <div class="logo">TunerDemo</div>
+      <div class="nav-actions">
+        <!-- Theme Toggle removed from here -->
+        <button class="btn btn-outline" style="padding: 8px 16px; font-size: 0.9rem;">View Source</button>
+      </div>
+    </nav>
+
+  <main>
+    <section class="hero">
+      <div class="hero-content">
+        <h1>Design in <br>Real-Time.</h1>
+        <p>Stop guessing hexadecimal codes. Tune your design system exactly how human eyes perceive it using pure OKLCH.</p>
+        <button class="btn">Get Started</button>
+      </div>
+      <div class="hero-image"></div>
+    </section>
+
+    <section class="features">
+      <div class="card">
+        <h3>Perceptual Lightness</h3>
+        <p>A 50% lightness yellow and a 50% lightness blue look identical in brightness. That is the magic of OKLCH.</p>
+      </div>
+      <div class="card">
+        <h3>Display P3 Support</h3>
+        <p>Push the Chroma slider to inject ultra-vibrant colors that were physically impossible to render with standard sRGB.</p>
+      </div>
+      <div class="card">
+        <h3>Zero Dependencies</h3>
+        <p>A completely agnostic vanilla JavaScript tool. Drop it into React, Vue, or plain HTML without bloating your bundle.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <a href="https://feinschmecker.dev" target="_blank">xFeinschmecker</a>
+  </footer>
+
+  <!-- ==========================================================================
+       INITIALIZE AND SYNC TUNER
+       ========================================================================== -->
+  <script type="module">
+    import { initTuner } from './oklch-tuner.js';
+
+    const tuneVariables = [
+      '--bg-main', '--surface', '--border',
+      '--text-main', '--text-muted',
+      '--accent', '--accent-hover', '--accent-text'
+    ];
+      initTuner({ variables: tuneVariables });
+
+  </script>
+
+</body>
+</html>

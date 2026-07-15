@@ -1,0 +1,30 @@
+{
+  "name": "oklch-tuner",
+  "version": "1.0.0",
+  "description": "A zero-dependency, framework-agnostic floating widget to live-tune OKLCH CSS variables in the browser.",
+  "type": "module",
+  "main": "oklch-tuner.js",
+  "types": "index.d.ts",
+  "scripts": {
+    "test": "echo \"See test.html for browser-based tests.\""
+  },
+  "keywords": [
+    "oklch",
+    "color",
+    "css",
+    "variables",
+    "developer-tools",
+    "dx",
+    "ui"
+  ],
+  "author": "feinschmecker",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/guy-sela/oklch-tuner.git"
+  },
+  "files": [
+    "oklch-tuner.js",
+    "index.d.ts"
+  ]
+}
