@@ -1,0 +1,12 @@
+# OKLCH Tuner
+
+OKLCH Tuner is a tiny DX utility for tuning OKLCH values directly in the browser.
+
+## Repository
+https://github.com/Guy-Sela/oklch-tuner
+
+## Description
+Built in plain JavaScript with no dependencies, it overlays a draggable widget onto any page. The widget reads CSS custom properties defined as OKLCH values, exposes L/C/H/A sliders for each, and writes changes back to the document root in real time. Variables can be passed explicitly via a config object, or auto-discovered by scanning the page's stylesheets. A "Copy CSS" button outputs the current tuned values as a ready-to-paste :root block.
+
+## Author
+Guy Sela (https://www.feinschmecker.dev/)

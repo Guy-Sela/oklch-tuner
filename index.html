@@ -3,199 +3,649 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>OKLCH Tuner | xFeinschmecker</title>
+  <title>OKLCH Tuner</title>
+  <meta name="description" content="A drop-in visual tuning tool for OKLCH color palettes in your browser.">
+
+  <!-- Open Graph / Premium Meta -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://www.feinschmecker.dev/">
+  <meta property="og:title" content="OKLCH Tuner | Real-time CSS Variable Editing">
+  <meta property="og:description" content="A drop-in visual tuning tool for OKLCH color palettes in your browser.">
+  <meta property="og:image" content="https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&w=1200&q=80">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="https://www.feinschmecker.dev/">
+  <meta name="twitter:title" content="OKLCH Tuner | Real-time CSS Variable Editing">
+  <meta name="twitter:description" content="A drop-in visual tuning tool for OKLCH color palettes in your browser.">
+  <meta name="twitter:image" content="https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&w=1200&q=80">
+
+  <!-- Favicon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><defs><linearGradient id=%22g%22 x1=%220%%22 y1=%220%%22 x2=%22100%%22 y2=%22100%%22><stop offset=%220%%22 stop-color=%22%23ff453a%22/><stop offset=%2225%%22 stop-color=%22%23ff9f0a%22/><stop offset=%2250%%22 stop-color=%22%2330d158%22/><stop offset=%2275%%22 stop-color=%22%230a84ff%22/><stop offset=%22100%%22 stop-color=%22%23bf5af2%22/></linearGradient></defs><circle cx=%2250%22 cy=%2250%22 r=%2238%22 fill=%22none%22 stroke=%22url(%23g)%22 stroke-width=%2214%22/></svg>">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 
   <style>
     /* ==========================================================================
        THEME VARIABLES
        ========================================================================== */
     :root, html[data-theme="light"] {
-      --bg-main: oklch(98% 0.01 250 / 1);
-      --surface: oklch(100% 0.00 0 / 1);
-      --border: oklch(90% 0.02 250 / 1);
-      --text-main: oklch(25% 0.04 250 / 1);
-      --text-muted: oklch(55% 0.02 250 / 1);
-      --accent: oklch(55% 0.15 250 / 1);
-      --accent-hover: oklch(45% 0.15 250 / 1);
-      --accent-text: oklch(100% 0.00 0 / 1);
+      --bg-main:      oklch(98% 0.01 250 / 1);
+      --surface:      oklch(100% 0.00 0 / 0.85);
+      --border:       oklch(92% 0.01 250 / 1);
+      --text-main:    oklch(20% 0.02 250 / 1);
+      --text-muted:   oklch(55% 0.02 250 / 1);
+      --accent:       oklch(55% 0.16 250 / 1);
+      --accent-hover: oklch(48% 0.16 250 / 1);
+      --accent-text:  oklch(100% 0.00 0 / 1);
     }
 
     html[data-theme="dark"] {
-      --bg-main: oklch(16% 0.01 250 / 1);
-      --surface: oklch(20% 0.02 250 / 1);
-      --border: oklch(28% 0.03 250 / 1);
-      --text-main: oklch(95% 0.01 250 / 1);
-      --text-muted: oklch(70% 0.02 250 / 1);
-      --accent: oklch(75% 0.15 250 / 1);
-      --accent-hover: oklch(85% 0.15 250 / 1);
-      --accent-text: oklch(16% 0.01 250 / 1);
+      --bg-main:      oklch(14% 0.01 250 / 1);
+      --surface:      oklch(18% 0.01 250 / 0.85);
+      --border:       oklch(26% 0.02 250 / 1);
+      --text-main:    oklch(96% 0.01 250 / 1);
+      --text-muted:   oklch(72% 0.01 250 / 1);
+      --accent:       oklch(72% 0.14 250 / 1);
+      --accent-hover: oklch(80% 0.14 250 / 1);
+      --accent-text:  oklch(14% 0.01 250 / 1);
     }
 
     /* ==========================================================================
-       REALISTIC UI STYLES
+       ANIMATIONS
        ========================================================================== */
+    @keyframes pulse {
+      0%, 100% { opacity: 0.6; }
+      50%       { opacity: 0.25; }
+    }
+
+    @keyframes fade-up {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ==========================================================================
+       BASE
+       ========================================================================== */
+    *, *::before, *::after { box-sizing: border-box; }
+
     body {
       background-color: var(--bg-main);
       color: var(--text-main);
-      font-family: system-ui, -apple-system, sans-serif;
+      font-family: "Inter", system-ui, -apple-system, sans-serif;
       margin: 0; padding: 0;
-      transition: background-color 0.3s, color 0.3s;
+      transition: background-color 0.4s ease, color 0.4s ease;
+      -webkit-font-smoothing: antialiased;
     }
 
-    /* Navigation */
+    h1, h2, h3, h4 {
+      font-family: "Plus Jakarta Sans", "Inter", system-ui, sans-serif;
+      color: var(--text-main);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin: 0;
+    }
+    h2 {
+      font-size: clamp(1.75rem, 4vw, 2.25rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      margin-bottom: 2rem;
+    }
+
+    /* ==========================================================================
+       NAVIGATION
+       ========================================================================== */
     nav {
-      display: flex; justify-content: space-between; align-items: center;
-      padding: 20px 5%;
+      position: sticky; top: 0; z-index: 1000;
       background-color: var(--surface);
       border-bottom: 1px solid var(--border);
-      transition: all 0.3s;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      transition: background-color 0.4s, border-color 0.4s;
     }
-    nav .logo { font-weight: 800; font-size: 1.2rem; letter-spacing: -0.5px; }
 
-    .nav-actions { display: flex; gap: 16px; align-items: center; }
-
-    .theme-toggle {
-      background: transparent; color: var(--text-muted);
-      border: none; padding: 8px 12px;
-      border-radius: 6px; cursor: pointer; font-size: 0.9rem; font-weight: 500;
-      transition: all 0.2s;
+    .nav-container {
+      display: flex; justify-content: space-between; align-items: center;
+      max-width: 1200px; margin: 0 auto;
+      padding: 0 5%;
+      height: 64px;
     }
-    .theme-toggle:hover { color: var(--text-main); background-color: var(--bg-main); }
 
-    /* Buttons */
+    .logo {
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-weight: 800; font-size: 1.2rem; letter-spacing: -0.5px;
+      display: flex; align-items: center; gap: 8px;
+      color: var(--text-main);
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    /* Gradient ring icon reused from favicon concept */
+    .logo-icon {
+      flex-shrink: 0;
+      width: 28px; height: 28px;
+    }
+
+    .nav-actions { display: flex; gap: 10px; align-items: center; }
+
+    /* ==========================================================================
+       BUTTONS
+       ========================================================================== */
     .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
       background-color: var(--accent); color: var(--accent-text);
-      border: 1px solid var(--accent); padding: 12px 24px; border-radius: 8px;
-      font-size: 1rem; font-weight: 600; cursor: pointer;
-      transition: all 0.2s;
+      border: 1px solid var(--accent);
+      padding: 0.65rem 1.4rem;
+      border-radius: 10px;
+      font-size: 0.9rem; font-weight: 600;
+      cursor: pointer; text-decoration: none;
+      white-space: nowrap;
+      transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 2px 12px -2px rgba(0,0,0,0.12);
     }
-    .btn:hover { background-color: var(--accent-hover); border-color: var(--accent-hover); }
-    .btn:active { transform: scale(0.98); }
+    .btn:hover  { background-color: var(--accent-hover); border-color: var(--accent-hover); transform: translateY(-1px); box-shadow: 0 6px 18px -4px rgba(0,0,0,0.18); }
+    .btn:active { transform: translateY(0); box-shadow: none; }
 
     .btn-outline {
       background-color: transparent; color: var(--text-main);
       border: 1px solid var(--border);
+      box-shadow: none;
     }
     .btn-outline:hover {
       border-color: var(--accent); color: var(--accent);
       background-color: transparent;
+      box-shadow: none;
     }
 
-    /* Hero Section */
-    .hero {
-      display: flex; align-items: center; justify-content: space-between; gap: 40px;
-      padding: 80px 5%; max-width: 1200px; margin: 0 auto;
+    /* Icon-only toggle button */
+    .btn-icon {
+      background: transparent; border: 1px solid var(--border);
+      color: var(--text-main);
+      padding: 0; width: 38px; height: 38px; border-radius: 10px;
+      box-shadow: none;
     }
-    .hero-content { flex: 1; }
-    .hero h1 { font-size: 3.5rem; margin: 0 0 20px 0; line-height: 1.1; letter-spacing: -0.03em; }
-    .hero p { color: var(--text-muted); font-size: 1.25rem; line-height: 1.6; margin-bottom: 32px; max-width: 500px; }
+    .btn-icon:hover { border-color: var(--accent); color: var(--accent); transform: none; box-shadow: none; }
+    .btn-icon svg { display: block; margin: 0 auto; }
+
+    /* ==========================================================================
+       HERO
+       ========================================================================== */
+    .hero-wrapper {
+      position: relative; overflow: hidden;
+    }
+
+    /* Decorative background blob */
+    .hero-wrapper::before {
+      content: '';
+      position: absolute;
+      top: -120px; right: -100px;
+      width: 600px; height: 600px;
+      border-radius: 50%;
+      background: radial-gradient(circle, oklch(72% 0.14 250 / 0.12) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero {
+      display: flex; align-items: center; justify-content: space-between; gap: 56px;
+      padding: 88px 5% 96px;
+      max-width: 1200px; margin: 0 auto;
+      animation: fade-up 0.6s ease both;
+    }
+
+    .hero-content { flex: 1; min-width: 0; }
+
+    /* Badge */
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background-color: var(--surface); border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 4px 12px 4px 6px;
+      font-size: 0.8rem; font-weight: 600; color: var(--text-muted);
+      margin-bottom: 1.5rem;
+      backdrop-filter: blur(8px);
+    }
+    .hero-badge-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: linear-gradient(135deg, oklch(65% 0.18 150), oklch(65% 0.18 250));
+      flex-shrink: 0;
+    }
+
+    .hero h1 {
+      font-size: clamp(2.6rem, 6vw, 4.25rem);
+      line-height: 1.06; letter-spacing: -0.04em;
+      font-weight: 800;
+      margin-bottom: 1.25rem;
+    }
+    .hero h1 span {
+      background: linear-gradient(135deg, var(--accent) 0%, oklch(65% 0.18 290) 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero p {
+      color: var(--text-muted); font-size: clamp(1rem, 2vw, 1.15rem);
+      line-height: 1.65; margin-bottom: 2.25rem;
+      max-width: 460px;
+    }
+
+    .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; }
 
     .hero-image {
-      flex: 1; height: 400px; border-radius: 20px;
-      background-image: url('https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&w=1200&q=80');
+      flex: 1; flex-shrink: 0;
+      min-width: 0;
+      aspect-ratio: 4 / 3;
+      max-height: 460px;
+      border-radius: 20px;
+      background-image: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1200&q=80');
       background-size: cover; background-position: center;
       border: 1px solid var(--border);
-      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+      box-shadow: 0 20px 48px rgba(0,0,0,0.06), 0 0 0 1px rgba(255,255,255,0.6) inset;
+      transition: border-color 0.4s;
     }
 
-    /* Feature Grid with Interactive Hover States */
-    .features {
-      padding: 60px 5%; max-width: 1200px; margin: 0 auto 80px;
-      display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px;
+    /* ==========================================================================
+       FEATURES
+       ========================================================================== */
+    .features-section {
+      padding: 72px 5%;
+      max-width: 1200px; margin: 0 auto;
     }
+
+    .features {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+
     .card {
       background-color: var(--surface); border: 1px solid var(--border);
-      border-radius: 16px; padding: 32px; cursor: default;
-      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), border-color 0.3s, box-shadow 0.3s;
+      border-radius: 18px; padding: 32px;
+      cursor: default;
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s, box-shadow 0.35s;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.025);
     }
-    .card h3 { margin-top: 0; font-size: 1.25rem; transition: color 0.3s; }
-    .card p { color: var(--text-muted); line-height: 1.5; margin-bottom: 0; }
+
+    .card-icon {
+      font-size: 1.75rem; line-height: 1;
+      margin-bottom: 18px;
+      display: block;
+    }
+
+    .card h3 {
+      font-size: 1.15rem; font-weight: 700;
+      margin-bottom: 10px;
+      transition: color 0.25s;
+    }
+
+    .card p {
+      color: var(--text-muted); line-height: 1.65;
+      font-size: 0.95rem; margin: 0;
+    }
 
     .card:hover {
       transform: translateY(-6px);
       border-color: var(--accent);
-      box-shadow: 0 12px 24px rgba(0,0,0,0.08);
+      box-shadow: 0 16px 36px rgba(0,0,0,0.07);
     }
     .card:hover h3 { color: var(--accent); }
 
-    /* Footer */
+    /* ==========================================================================
+       NEWS / INSIGHTS
+       ========================================================================== */
+    .news-section {
+      padding: 72px 5%;
+      max-width: 1200px; margin: 0 auto 64px;
+      border-top: 1px solid var(--border);
+    }
+
+    .news-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+
+    .news-item {
+      display: flex; flex-direction: column; gap: 14px;
+      text-decoration: none; color: inherit;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 16px;
+      transition: border-color 0.3s, box-shadow 0.35s;
+    }
+    .news-item:hover {
+      border-color: var(--accent);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.05);
+    }
+
+    .news-item-image-wrapper {
+      width: 100%; aspect-ratio: 16 / 9;
+      border-radius: 10px; overflow: hidden;
+      background-color: var(--border);
+      border: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .news-item-image {
+      width: 100%; height: 100%;
+      object-fit: contain;
+      background-color: var(--surface);
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      display: block;
+    }
+    .news-item:hover .news-item-image { transform: scale(1.04); }
+
+    .news-item h4 {
+      font-size: 1rem; line-height: 1.45; font-weight: 700;
+      color: var(--text-main);
+      transition: color 0.22s;
+    }
+    .news-item:hover h4 { color: var(--accent); }
+
+    .news-item p {
+      margin: 0; color: var(--text-muted);
+      font-size: 0.88rem; line-height: 1.55;
+    }
+
+    .news-meta {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 0.8rem; color: var(--text-muted);
+      margin-top: auto; padding-top: 4px;
+    }
+
+    /* Skeleton */
+    .skeleton-bar {
+      background: var(--border);
+      border-radius: 6px;
+      animation: pulse 1.6s infinite ease-in-out;
+    }
+
+    /* ==========================================================================
+       FOOTER
+       ========================================================================== */
     footer {
-      text-align: center; padding: 40px 20px;
-      font-size: 0.9rem; color: var(--text-muted);
-      border-top: 1px solid var(--border); background-color: var(--surface);
+      display: flex; flex-direction: row; justify-content: center; align-items: center; gap: 24px;
+      height: 64px;
+      font-size: 0.88rem; color: var(--text-muted);
+      border-top: 1px solid var(--border);
+      background-color: var(--surface);
+      text-align: center;
     }
     footer a { color: var(--text-main); text-decoration: none; font-weight: 600; transition: color 0.2s; }
     footer a:hover { color: var(--accent); }
 
-    /* Dark mode shadow adjustment */
-    html[data-theme="dark"] .card:hover {
-      box-shadow: 0 12px 24px rgba(0,0,0,0.4);
+    /* ==========================================================================
+       DARK MODE ADJUSTMENTS
+       ========================================================================== */
+    html[data-theme="dark"] .card:hover      { box-shadow: 0 16px 36px rgba(0,0,0,0.4); }
+    html[data-theme="dark"] .hero-image      { box-shadow: 0 20px 48px rgba(0,0,0,0.4); }
+    html[data-theme="dark"] .hero-wrapper::before {
+      background: radial-gradient(circle, oklch(65% 0.14 250 / 0.1) 0%, transparent 70%);
     }
     html[data-theme="dark"] .hero-image {
-      box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+      box-shadow: 0 20px 48px rgba(0,0,0,0.5);
     }
 
-    @media (max-width: 768px) {
-      .hero { flex-direction: column; text-align: center; padding: 40px 5%; }
-      .hero p { margin: 0 auto 32px; }
-      .hero-image { width: 100%; height: 300px; }
+    /* ==========================================================================
+       RESPONSIVE — TABLET (≤ 900px)
+       ========================================================================== */
+    @media (max-width: 900px) {
+      .features  { grid-template-columns: repeat(2, 1fr); }
+      .news-grid { grid-template-columns: repeat(2, 1fr); }
+
+      .hero {
+        gap: 40px;
+        padding: 64px 5% 72px;
+      }
+      .hero-image { max-height: 360px; }
+    }
+
+    /* ==========================================================================
+       RESPONSIVE — MOBILE (≤ 640px)
+       ========================================================================== */
+    @media (max-width: 640px) {
+      .hero {
+        flex-direction: column;
+        padding: 48px 5% 56px;
+        gap: 32px;
+        text-align: left;
+      }
+
+      .hero-content { width: 100%; }
+      .hero p { max-width: 100%; margin-bottom: 1.75rem; }
+
+      .hero-image {
+        width: 100%;
+        flex: none;
+        aspect-ratio: 16 / 10;
+        max-height: none;
+        border-radius: 16px;
+      }
+
+      .hero-actions {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .hero-actions .btn { width: 100%; justify-content: center; }
+
+      .features-section { padding: 48px 5%; }
+      .features  { grid-template-columns: 1fr; gap: 16px; }
+
+      .news-section  { padding: 48px 5%; margin-bottom: 40px; }
+      .news-grid     { grid-template-columns: 1fr; gap: 32px; }
+
       .nav-actions .btn-outline { display: none; }
+
+      .card { padding: 24px; }
     }
   </style>
 </head>
 <body>
 
-    <nav>
-      <div class="logo">TunerDemo</div>
+  <nav>
+    <div class="nav-container">
+      <a href="/" class="logo">
+        <!-- Gradient ring icon -->
+        <svg class="logo-icon" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <defs>
+            <linearGradient id="logo-g" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%"   stop-color="#ff453a"/>
+              <stop offset="33%"  stop-color="#ff9f0a"/>
+              <stop offset="66%"  stop-color="#30d158"/>
+              <stop offset="100%" stop-color="#0a84ff"/>
+            </linearGradient>
+          </defs>
+          <circle cx="14" cy="14" r="9" fill="none" stroke="url(#logo-g)" stroke-width="4"/>
+        </svg>
+        OKLCH Tuner
+      </a>
+
       <div class="nav-actions">
-        <!-- Theme Toggle removed from here -->
-        <button class="btn btn-outline" style="padding: 8px 16px; font-size: 0.9rem;">View Source</button>
+        <!-- Dark mode toggle -->
+        <button class="btn btn-icon" id="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode">
+          <svg id="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          <svg id="icon-sun"  width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        </button>
+
+        <a href="https://github.com/Guy-Sela/oklch-tuner" target="_blank" rel="noopener noreferrer" class="btn btn-outline" style="padding: 0.55rem 1rem; font-size: 0.88rem;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+          GitHub
+        </a>
       </div>
-    </nav>
+    </div>
+  </nav>
 
   <main>
-    <section class="hero">
-      <div class="hero-content">
-        <h1>Design in <br>Real-Time.</h1>
-        <p>Stop guessing hexadecimal codes. Tune your design system exactly how human eyes perceive it using pure OKLCH.</p>
-        <button class="btn">Get Started</button>
-      </div>
-      <div class="hero-image"></div>
-    </section>
+    <!-- HERO -->
+    <div class="hero-wrapper">
+      <section class="hero">
+        <div class="hero-content">
+          <div class="hero-badge">
+            <span class="hero-badge-dot"></span>
+            Display P3 · Zero Dependencies · Drop-in
+          </div>
+          <h1>Just a tiny<br><span>DX widget</span></h1>
+          <p>Tune OKLCH values directly in the browser. Copy the results. Done.</p>
+          <div class="hero-actions">
+            <a href="https://github.com/Guy-Sela/oklch-tuner" class="btn">Get Started</a>
+            <a href="#features" class="btn btn-outline">Learn More</a>
+          </div>
+        </div>
+        <div class="hero-image" role="img" aria-label="Abstract colorful design preview"></div>
+      </section>
+    </div>
 
-    <section class="features">
-      <div class="card">
-        <h3>Perceptual Lightness</h3>
-        <p>A 50% lightness yellow and a 50% lightness blue look identical in brightness. That is the magic of OKLCH.</p>
-      </div>
-      <div class="card">
-        <h3>Display P3 Support</h3>
-        <p>Push the Chroma slider to inject ultra-vibrant colors that were physically impossible to render with standard sRGB.</p>
-      </div>
-      <div class="card">
-        <h3>Zero Dependencies</h3>
-        <p>A completely agnostic vanilla JavaScript tool. Drop it into React, Vue, or plain HTML without bloating your bundle.</p>
+    <!-- FEATURES -->
+    <div class="features-section">
+      <section id="features" class="features">
+        <div class="card">
+          <span class="card-icon" aria-hidden="true">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </span>
+          <h3>Perceptual Lightness</h3>
+          <p>A 50% lightness yellow and a 50% lightness blue look identical in brightness. That is the magic of OKLCH.</p>
+        </div>
+        <div class="card">
+          <span class="card-icon" aria-hidden="true">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M22 17a10 10 0 0 0-20 0"/><path d="M6 17a6 6 0 0 1 12 0"/><path d="M10 17a2 2 0 0 1 4 0"/></svg>
+          </span>
+          <h3>Display P3 Support</h3>
+          <p>Push the Chroma slider to inject ultra-vibrant colors that were physically impossible to render with standard sRGB.</p>
+        </div>
+        <div class="card">
+          <span class="card-icon" aria-hidden="true">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          </span>
+          <h3>Plug and Play</h3>
+          <p>A completely agnostic vanilla JavaScript tool. Drop it into React, Vue, or plain HTML without bloating your bundle.</p>
+        </div>
+      </section>
+    </div>
+
+    <!-- NEWS -->
+    <section class="news-section">
+      <h2>Industry Insights</h2>
+      <div class="news-grid" id="news-grid">
+        <!-- 3 skeleton cards -->
+        <div class="news-item" aria-hidden="true">
+          <div class="news-item-image-wrapper">
+            <div class="skeleton-bar" style="height:100%; border-radius:0;"></div>
+          </div>
+          <div class="skeleton-bar" style="height:18px; width:80%;"></div>
+          <div class="skeleton-bar" style="height:14px; width:60%;"></div>
+          <div class="skeleton-bar" style="height:12px; width:40%;"></div>
+        </div>
+        <div class="news-item" aria-hidden="true">
+          <div class="news-item-image-wrapper">
+            <div class="skeleton-bar" style="height:100%; border-radius:0;"></div>
+          </div>
+          <div class="skeleton-bar" style="height:18px; width:75%;"></div>
+          <div class="skeleton-bar" style="height:14px; width:55%;"></div>
+          <div class="skeleton-bar" style="height:12px; width:35%;"></div>
+        </div>
+        <div class="news-item" aria-hidden="true">
+          <div class="news-item-image-wrapper">
+            <div class="skeleton-bar" style="height:100%; border-radius:0;"></div>
+          </div>
+          <div class="skeleton-bar" style="height:18px; width:85%;"></div>
+          <div class="skeleton-bar" style="height:14px; width:65%;"></div>
+          <div class="skeleton-bar" style="height:12px; width:45%;"></div>
+        </div>
       </div>
     </section>
   </main>
 
   <footer>
-    <a href="https://feinschmecker.dev" target="_blank">xFeinschmecker</a>
+    <div><a href="https://feinschmecker.dev" target="_blank" rel="noopener noreferrer">xFeinschmecker</a> &bull; <a href="license.html">MIT License</a></div>
   </footer>
 
-  <!-- ==========================================================================
-       INITIALIZE AND SYNC TUNER
-       ========================================================================== -->
   <script type="module">
     import { initTuner } from './oklch-tuner.js';
 
+    // ── Tuner ──────────────────────────────────────────────────────────────────
     const tuneVariables = [
       '--bg-main', '--surface', '--border',
       '--text-main', '--text-muted',
       '--accent', '--accent-hover', '--accent-text'
     ];
-      initTuner({ variables: tuneVariables });
+    initTuner({ variables: tuneVariables });
 
+    // ── Theme toggle ───────────────────────────────────────────────────────────
+    const html       = document.documentElement;
+    const toggle     = document.getElementById('theme-toggle');
+    const iconMoon   = document.getElementById('icon-moon');
+    const iconSun    = document.getElementById('icon-sun');
+
+    function applyTheme(dark) {
+      html.setAttribute('data-theme', dark ? 'dark' : 'light');
+      iconMoon.style.display = dark ? 'none'  : '';
+      iconSun.style.display  = dark ? ''      : 'none';
+    }
+
+    // Respect OS preference on first load
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    applyTheme(prefersDark);
+
+    toggle.addEventListener('click', () => {
+      applyTheme(html.getAttribute('data-theme') !== 'dark');
+    });
+
+    // ── News ───────────────────────────────────────────────────────────────────
+    function escapeText(str) {
+      const d = document.createElement('div');
+      d.textContent = str;
+      return d.innerHTML;
+    }
+
+    async function fetchNews() {
+      try {
+        const res = await fetch('https://dev.to/api/articles?tag=css&top=7&per_page=3');
+        if (!res.ok) throw new Error('Network error');
+        const articles = await res.json();
+
+        const grid = document.getElementById('news-grid');
+        grid.innerHTML = '';
+
+        articles.forEach(article => {
+          const item = document.createElement('a');
+          item.className = 'news-item';
+          item.href = article.url;
+          item.target = '_blank';
+          item.rel = 'noopener noreferrer';
+
+          const imageUrl = article.cover_image
+            || 'https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?auto=format&fit=crop&w=600&q=80';
+
+          const date = new Date(article.published_at).toLocaleDateString('en-US', {
+            month: 'short', day: 'numeric', year: 'numeric'
+          });
+
+          const title  = escapeText(article.title);
+          const author = escapeText(article.user?.name || 'Unknown');
+          const desc   = escapeText(article.description || 'A brief look into modern front-end techniques.');
+
+          item.innerHTML = `
+            <div class="news-item-image-wrapper">
+              <img class="news-item-image" src="${imageUrl}" alt="${title}" loading="lazy">
+            </div>
+            <h4>${title}</h4>
+            <p>${desc}</p>
+            <div class="news-meta">
+              <span>${author}</span><span>·</span><span>${date}</span>
+            </div>
+          `;
+          grid.appendChild(item);
+        });
+      } catch (err) {
+        console.error('News fetch failed:', err);
+        document.getElementById('news-grid').innerHTML =
+          '<p style="grid-column:1/-1;text-align:center;color:var(--text-muted);font-size:0.95rem;">Failed to load insights. Check your connection and try again.</p>';
+      }
+    }
+
+    fetchNews();
   </script>
 
 </body>
