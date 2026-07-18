@@ -2,7 +2,7 @@
 
 A tiny developer utility for live-tuning OKLCH variables in the browser. It overlays a small widget to visually adjust lightness, chroma, hue, and alpha channels for CSS custom properties.
 
-[Interactive Demo](https://www.feinschmecker.dev/oklch-tuner-demo)
+**[Interactive Demo](https://www.feinschmecker.dev/oklch-tuner-demo)**
 
 ## Installation
 
@@ -29,7 +29,7 @@ import { initTuner } from 'oklch-tuner';
 initTuner();
 ```
 
-To explicitly define which variables to tune, pass a configuration object:
+To explicitly define which variables to tune, pass a configuration object. E.g.:
 
 ```javascript
 import { initTuner } from 'oklch-tuner';

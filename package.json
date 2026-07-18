@@ -5,9 +5,6 @@
   "type": "module",
   "main": "oklch-tuner.js",
   "types": "index.d.ts",
-  "scripts": {
-    "test": "echo \"See test.html for browser-based tests.\""
-  },
   "keywords": [
     "oklch",
     "color",
@@ -21,7 +18,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/guy-sela/oklch-tuner.git"
+    "url": "git+https://github.com/guy-sela/oklch-tuner.git"
   },
   "files": [
     "oklch-tuner.js",
