@@ -82,9 +82,11 @@ export function initTuner(config = {}) {
       all: initial; position: fixed; bottom: 24px; right: 24px; z-index: 2147483647;
       background: #18181b; color: #f4f4f5; padding: 16px 20px 20px;
       border-radius: 12px; font-family: ui-sans-serif, system-ui, sans-serif;
-      width: 320px; box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+      width: calc(100vw - 32px); max-width: 320px; box-shadow: 0 20px 40px rgba(0,0,0,0.6);
       border: 1px solid #3f3f46; box-sizing: border-box;
     }
+    #oklch-tuner-widget.ot-collapsed .ot-collapsible { display: none; }
+    #oklch-tuner-widget.ot-collapsed .ot-header { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
     #oklch-tuner-widget * { box-sizing: border-box; font-family: inherit; }
 
     .ot-header {
@@ -93,6 +95,7 @@ export function initTuner(config = {}) {
     }
     .ot-drag-handle {
       cursor: grab; color: #fff; width: 16px; height: 16px; display: flex; align-items: center; flex-shrink: 0;
+      touch-action: none;
     }
     .ot-drag-handle:hover { color: #e4e4e7; }
     .ot-drag-handle:active { cursor: grabbing; color: #fff; }
@@ -152,21 +155,25 @@ export function initTuner(config = {}) {
   container.id = 'oklch-tuner-widget';
 
   const dragIcon = `<svg viewBox="0 0 16 16" fill="currentColor" width="16" height="16"><path d="M5 4h2v2H5V4zm4 0h2v2H9V4zm-4 4h2v2H5V8zm4 0h2v2H9V8zm-4 4h2v2H5v-2zm4 0h2v2H9v-2z"/></svg>`;
+  const collapseIcon = `<svg viewBox="0 0 16 16" fill="currentColor" width="14" height="14"><path d="M4 6h8l-4 5z"/></svg>`;
 
   container.innerHTML = `
     <div class="ot-header">
       <div class="ot-drag-handle" id="ot-drag-handle">${dragIcon}</div>
       <h3>oklch-tuner</h3>
+      <button class="ot-icon-btn" id="ot-collapse-btn" style="padding:4px 6px;" title="Toggle widget">${collapseIcon}</button>
       <button class="ot-copy-btn" id="ot-copy-btn">Copy CSS</button>
     </div>
-    <div class="ot-complex-warn" id="ot-complex-warn">
-      ⚠️ Complex CSS value detected (calc/var). Moving sliders will overwrite it with an absolute color.
+    <div class="ot-collapsible">
+      <div class="ot-complex-warn" id="ot-complex-warn">
+        ⚠️ Complex CSS value detected (calc/var). Moving sliders will overwrite it with an absolute color.
+      </div>
+      <div class="ot-var-grid" id="ot-var-grid"></div>
+      <div class="ot-control"><label>L</label><input type="range" id="ot-l" min="0" max="100" step="1"><span id="ot-val-l"></span></div>
+      <div class="ot-control"><label>C</label><input type="range" id="ot-c" min="0" max="0.4" step="0.005"><span id="ot-val-c"></span></div>
+      <div class="ot-control"><label>H</label><input type="range" id="ot-h" min="0" max="360" step="1"><span id="ot-val-h"></span></div>
+      <div class="ot-control"><label>A</label><input type="range" id="ot-a" min="0" max="1" step="0.05"><span id="ot-val-a"></span></div>
     </div>
-    <div class="ot-var-grid" id="ot-var-grid"></div>
-    <div class="ot-control"><label>L</label><input type="range" id="ot-l" min="0" max="100" step="1"><span id="ot-val-l"></span></div>
-    <div class="ot-control"><label>C</label><input type="range" id="ot-c" min="0" max="0.4" step="0.005"><span id="ot-val-c"></span></div>
-    <div class="ot-control"><label>H</label><input type="range" id="ot-h" min="0" max="360" step="1"><span id="ot-val-h"></span></div>
-    <div class="ot-control"><label>A</label><input type="range" id="ot-a" min="0" max="1" step="0.05"><span id="ot-val-a"></span></div>
   `;
   shadow.appendChild(container);
   document.body.appendChild(host);
@@ -178,6 +185,19 @@ export function initTuner(config = {}) {
     container.style.bottom = 'auto';
     container.style.left = savedPos.left + 'px';
     container.style.top  = savedPos.top  + 'px';
+    
+    // Ensure the restored position is within the current viewport (e.g. if switching from desktop to mobile)
+    requestAnimationFrame(() => {
+      const rect = container.getBoundingClientRect();
+      const maxLeft = window.innerWidth - rect.width;
+      const maxTop = window.innerHeight - rect.height;
+      
+      const clampedLeft = Math.max(0, Math.min(savedPos.left, maxLeft));
+      const clampedTop = Math.max(0, Math.min(savedPos.top, maxTop));
+      
+      container.style.left = clampedLeft + 'px';
+      container.style.top = clampedTop + 'px';
+    });
   }
 
   // ── Variable tabs ───────────────────────────────────────────────────────────
@@ -236,6 +256,16 @@ export function initTuner(config = {}) {
     });
   });
 
+  // ── Collapse ────────────────────────────────────────────────────────────────
+  const collapseBtn = shadow.getElementById('ot-collapse-btn');
+  collapseBtn.addEventListener('click', () => {
+    container.classList.toggle('ot-collapsed');
+    const isCollapsed = container.classList.contains('ot-collapsed');
+    collapseBtn.innerHTML = isCollapsed
+      ? `<svg viewBox="0 0 16 16" fill="currentColor" width="14" height="14"><path d="M4 10h8l-4-5z"/></svg>`
+      : `<svg viewBox="0 0 16 16" fill="currentColor" width="14" height="14"><path d="M4 6h8l-4 5z"/></svg>`;
+  });
+
   // ── Copy CSS ────────────────────────────────────────────────────────────────
   const copyBtn = shadow.getElementById('ot-copy-btn');
   copyBtn.addEventListener('click', () => {
@@ -257,6 +287,7 @@ export function initTuner(config = {}) {
 
   handle.addEventListener('pointerdown', (e) => {
     isDragging = true;
+    handle.setPointerCapture(e.pointerId);
     const rect = container.getBoundingClientRect();
     initialLeft = rect.left; initialTop = rect.top;
     startX = e.clientX; startY = e.clientY;
@@ -268,12 +299,25 @@ export function initTuner(config = {}) {
   });
   window.addEventListener('pointermove', (e) => {
     if (!isDragging) return;
-    container.style.left = (initialLeft + e.clientX - startX) + 'px';
-    container.style.top  = (initialTop  + e.clientY - startY) + 'px';
+    
+    let newLeft = initialLeft + e.clientX - startX;
+    let newTop = initialTop + e.clientY - startY;
+    
+    // Clamp to screen bounds to prevent disappearing off-screen
+    const rect = container.getBoundingClientRect();
+    const maxLeft = window.innerWidth - rect.width;
+    const maxTop = window.innerHeight - rect.height;
+    
+    newLeft = Math.max(0, Math.min(newLeft, maxLeft));
+    newTop = Math.max(0, Math.min(newTop, maxTop));
+    
+    container.style.left = newLeft + 'px';
+    container.style.top  = newTop + 'px';
   });
-  window.addEventListener('pointerup', () => {
+  window.addEventListener('pointerup', (e) => {
     if (!isDragging) return;
     isDragging = false;
+    handle.releasePointerCapture(e.pointerId);
     localStorage.setItem(STORAGE_POS_KEY, JSON.stringify({
       left: parseFloat(container.style.left),
       top:  parseFloat(container.style.top),

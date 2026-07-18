@@ -11,7 +11,7 @@ A tiny developer utility for live-tuning OKLCH variables in the browser. It over
 npm install oklch-tuner
 ```
 
-### CDN (Browser)
+### CDN 
 ```html
 <script type="module">
   import { initTuner } from 'https://unpkg.com/oklch-tuner/oklch-tuner.js';
