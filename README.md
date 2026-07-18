@@ -1,5 +1,7 @@
 # OKLCH Tuner
 
+[![npm package](https://img.shields.io/npm/v/oklch-tuner)](https://www.npmjs.com/package/oklch-tuner)
+
 A tiny developer utility for live-tuning OKLCH variables in the browser. It overlays a small widget to visually adjust lightness, chroma, hue, and alpha channels for CSS custom properties.
 
 **→** **[Interactive Demo](https://www.feinschmecker.dev/oklch-tuner-demo)**

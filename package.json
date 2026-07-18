@@ -23,5 +23,8 @@
   "files": [
     "oklch-tuner.js",
     "index.d.ts"
-  ]
+  ],
+  "dependencies": {
+    "oklch-tuner": "^1.0.0"
+  }
 }
